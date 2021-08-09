@@ -1,4 +1,5 @@
-﻿using System;
+﻿using chatCommon;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,11 +10,11 @@ namespace chatClient
         static async Task<int> Main(string[] args)
         {
             var client = new Client(new UTF8Encoding());
-            var app = new App(client, "ws://localhost:8080/chat/");
+            var parser = new Parser();
+            var terminal = new Terminal();
+            var app = new App(client, parser, terminal, "ws://localhost:8080/chat/");
 
-            var returnCode = await app.Boot();
-
-            Console.ReadLine();
+            var returnCode = await app.Start();
             return (int)returnCode;
         }
     }

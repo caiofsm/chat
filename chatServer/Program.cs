@@ -1,4 +1,6 @@
-﻿using System;
+﻿using chatServer;
+using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ChatServer
@@ -8,16 +10,13 @@ namespace ChatServer
         static int Main(string[] args)
         {
             Console.WriteLine("ChatServer");
-            BootStrap();
+            var server = new WebSocketHandler(new UTF8Encoding(), "http://localhost:8080/chat/");
+            var app = new App(server);
+            app.Boot();
+            //WebSocketHandler.Boot();
             Console.ReadLine();
 
             return 0;
-        }
-
-        private static void BootStrap()
-        {
-            var app = new ChatServer();
-            app.Boot("http://localhost:8080/chat/");
         }
     }
 }

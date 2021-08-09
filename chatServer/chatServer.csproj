@@ -6,4 +6,8 @@
     <AssemblyName>chatServer</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\chatCommon\chatCommon\chatCommon.csproj" />
+  </ItemGroup>
+
 </Project>

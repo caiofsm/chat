@@ -1,50 +1,68 @@
-﻿using System;
+﻿using chatClient;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace chatClient
+namespace chatCommon
 {
     public class App
     {
-        public App(IClient client, string url)
-        {
-            this.Client = client;
-            Url = url;
-        }
         private IClient Client { get; set; }
 
         private string Url { get; set; }
-        public async Task<AppResult> Boot()
-        {
-            var shouldContinue= true;
+        private string UserName { get; set; }
+        private bool UserRegistered { get; set; }
+        private IParser Parser { get; set; }
+        private IUserInterface UserInterface { get; set; }
 
-            showWelcomeMessage();
-            var userName = printPromptAndgetInput();
-            //showMessage($"Conectando ao servidor {Host}:{Port}");
-            var connectionResult= await Client.Connect(Url);
+        public App(IClient client, IParser parser, IUserInterface userInterface, string url)
+        {
+            Client = client;
+            Url = url;
+            UserRegistered = false;
+            Parser = parser;
+            UserInterface = userInterface;
+        }
+        public async Task<AppResult> Start()
+        {
+            UserInterface.ShowWelcomeMessage();
+
+            var connectionResult = await Client.Connect(Url, this.HandlePayloadMessage);
             if (!connectionResult.Success)
             {
-                showMessage($"Falha ao conectar ao {Url}");
+                UserInterface.ShowMessage($"Connection failed :( Url:{Url}\n");
                 return AppResult.FalhaAoConectar;
             }
 
-            showMessage($"Você foi registrado como {userName}. Entrando no canal #general");
-            
-            while (shouldContinue)
+            while (!UserRegistered)
             {
-                var input= printPromptAndgetInput();
-                var result = Parser.parseTextInput(input);
+                UserName = UserInterface.PrintPromptAndgetInput().Trim();
+                TryRegisterNickName();
 
-                switch (result.Command)
+                await Task.Delay(1000);
+            }
+
+            while (true)
+            {
+                var input = UserInterface.PrintPromptAndgetInput();
+                var parserResult = Parser.ParseTextInput(input);
+                var payload = new Payload()
                 {
+                    Command = parserResult.Command,
+                    Message = parserResult.Message,
+                    CommandArgument = parserResult.CommandArgument,
+                    UserName = UserName
+                };
+
+                switch (parserResult.Command)
+                {
+
                     case Command.GlobalMessage:
-                        //TODO: Mandar para o servidor
-                        Client.SendMessage(result.Message);
-                        break;
+                    case Command.AnotherUserMessage:
                     case Command.PrivateMessage:
                         //TODO: Mandar para o servidor
-                        Client.SendMessage(result.Message, new User { Name = result.UserName });
+                        Client.SendMessage(payload);
                         break;
                     case Command.Exit:
                         return AppResult.Sair;
@@ -55,26 +73,44 @@ namespace chatClient
 
                 await Task.Delay(100);
             }
-
-            return 0;
         }
 
-
-        public void showWelcomeMessage()
+        private void TryRegisterNickName()
         {
-            showMessage("*** Bem vindo ao chat. Insira seu usuário:");
+            Client.SendMessage(new Payload()
+            {
+                UserName=UserName,
+                Command=Command.RegisterNickName
+            }).Wait();
         }
 
-        public void showMessage(string str)
+        public void HandlePayloadMessage(Payload payload)
         {
-            Console.WriteLine(str);
-        }
+            var message = String.Empty;
 
-        public string printPromptAndgetInput()
-        {
-            Console.Write("> ");
-            return Console.ReadLine();
+            switch (payload.Command)
+            {
+                case Command.RegisterNickName:
+                    UserInterface.ShowMessage(payload.Message);
+                    UserRegistered = payload.Success;
+                    return;
+                case Command.GlobalMessage:
+                    message = $"{payload.UserName} says: {payload.Message}";
+
+                    break;
+                case Command.PrivateMessage:
+                    message = $"{payload.UserName} privately says to {payload.CommandArgument}: {payload.Message}";
+                    break;
+                case Command.AnotherUserMessage:
+                    message = $"{payload.UserName} says to {payload.CommandArgument}: {payload.Message}";
+                    break;
+                default:
+                    return;
+            }
+
+            UserInterface.ShowMessage(message);
         }
+        
     }
 
     public enum AppResult
@@ -83,13 +119,7 @@ namespace chatClient
         Sair = 2
     }
 
-    public enum Command
-    {
-        GlobalMessage = 1,
-        PrivateMessage = 2,
-        Exit = 3,
-        InvalidCommand= 4
-    }
+
 
 
 }
