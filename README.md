@@ -19,3 +19,8 @@ Os comandos disponíveis são:
     Envia "Bom dia!" apenas para "NomeDeUmUsuario". Outros usuários não conseguem ver a mensagem.
    
 * Digitar /exit encerra o client.
+
+Exemplo de uso:
+
+![Captura de Tela (10)](https://user-images.githubusercontent.com/71583103/128657493-e4c83227-aafd-40c3-b906-0a19c0303aeb.png)
+
