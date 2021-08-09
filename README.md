@@ -7,7 +7,7 @@ Abrir e buildar a solution
 Executar primeiro o projeto chatServer.
 
 Em seguida executar o chatClient.
-* Informe o usuario.
+* Informe o usuário.
 
 Os comandos disponíveis são:
 * Digitar qualquer mensagem vai enviar para todos os usuários conectados.
