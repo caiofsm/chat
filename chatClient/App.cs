@@ -35,16 +35,7 @@ namespace chatCommon
                 return AppResult.FalhaAoConectar;
             }
 
-            
-
-            while (UserRegistered != true)
-            {
-                UserName = UserInterface.PrintPromptAndgetInput().Trim();
-                this.UserRegistered = false;
-                TryRegisterNickName();
-                CheckUntilResponseOrTimeout(100).Wait(2000);
-                this.UserRegistered = null;
-            }
+            HandleLogin();
 
             while (true)
             {
@@ -75,6 +66,38 @@ namespace chatCommon
 
                 await Task.Delay(100);
             }
+        }
+
+        private void HandleLogin()
+        {
+            while (true)
+            {
+                UserName = UserInterface.PrintPromptAndgetInput().Trim();
+                if (!ValidateUserName(UserName))
+                {
+                    continue;
+                }
+
+                this.UserRegistered = false;
+                TryRegisterNickName();
+                CheckUntilResponseOrTimeout(100).Wait(2000);
+                if (this.UserRegistered == true)
+                {
+                    break;
+                }
+                this.UserRegistered = null;
+            }
+        }
+
+        private bool ValidateUserName(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                UserInterface.ShowMessage("Nome de usuário invalido!");
+                return false;
+            }
+
+            return true;
         }
 
         private async Task CheckUntilResponseOrTimeout(int pollingInterval)
