@@ -66,7 +66,6 @@ namespace chatClient
         public async Task<ClientResult> SendMessage(Payload message)
         {
             var json = Encoding.GetBytes(JsonSerializer.Serialize(message));
-            //await WebSocket.SendAsync(new ArraySegment<byte>(payload), WebSocketMessageType.Binary, false, CancellationToken.None);
             await WebSocket.SendAsync(new ArraySegment<byte>(json), WebSocketMessageType.Text, false, CancellationToken.None);
             return new ClientResult { Success = true };
         }

@@ -12,7 +12,7 @@ namespace chatCommon
 
         private string Url { get; set; }
         private string UserName { get; set; }
-        private bool UserRegistered { get; set; }
+        private bool? UserRegistered { get; set; }
         private IParser Parser { get; set; }
         private IUserInterface UserInterface { get; set; }
 
@@ -20,7 +20,7 @@ namespace chatCommon
         {
             Client = client;
             Url = url;
-            UserRegistered = false;
+            UserRegistered = null;
             Parser = parser;
             UserInterface = userInterface;
         }
@@ -35,12 +35,15 @@ namespace chatCommon
                 return AppResult.FalhaAoConectar;
             }
 
-            while (!UserRegistered)
+            
+
+            while (UserRegistered != true)
             {
                 UserName = UserInterface.PrintPromptAndgetInput().Trim();
+                this.UserRegistered = false;
                 TryRegisterNickName();
-
-                await Task.Delay(1000);
+                CheckUntilResponseOrTimeout(100).Wait(2000);
+                this.UserRegistered = null;
             }
 
             while (true)
@@ -61,7 +64,6 @@ namespace chatCommon
                     case Command.GlobalMessage:
                     case Command.AnotherUserMessage:
                     case Command.PrivateMessage:
-                        //TODO: Mandar para o servidor
                         Client.SendMessage(payload);
                         break;
                     case Command.Exit:
@@ -72,6 +74,19 @@ namespace chatCommon
                 }
 
                 await Task.Delay(100);
+            }
+        }
+
+        private async Task CheckUntilResponseOrTimeout(int pollingInterval)
+        {
+            var shouldCheck = true;
+            while (shouldCheck)
+            {
+                if (this.UserRegistered == true)
+                {
+                    shouldCheck = false;
+                }
+                await Task.Delay(pollingInterval);
             }
         }
 
@@ -91,8 +106,11 @@ namespace chatCommon
             switch (payload.Command)
             {
                 case Command.RegisterNickName:
-                    UserInterface.ShowMessage(payload.Message);
-                    UserRegistered = payload.Success;
+                    if (this.UserRegistered == false)
+                    {
+                        UserInterface.ShowMessage(payload.Message);
+                        UserRegistered = payload.Success;
+                    }
                     return;
                 case Command.GlobalMessage:
                     message = $"{payload.UserName} says: {payload.Message}";
