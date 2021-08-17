@@ -3,7 +3,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatServer
+namespace chatServer
 {
     class Program
     {

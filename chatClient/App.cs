@@ -1,10 +1,8 @@
-﻿using chatClient;
+﻿using chatCommon;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace chatCommon
+namespace chatClient
 {
     public class App
     {
@@ -39,7 +37,7 @@ namespace chatCommon
 
             while (true)
             {
-                var input = UserInterface.PrintPromptAndgetInput();
+                var input = UserInterface.PrintPromptAndGetInput();
                 var parserResult = Parser.ParseTextInput(input);
                 var payload = new Payload()
                 {
@@ -72,7 +70,7 @@ namespace chatCommon
         {
             while (true)
             {
-                UserName = UserInterface.PrintPromptAndgetInput().Trim();
+                UserName = UserInterface.PrintPromptAndGetInput().Trim();
                 if (!ValidateUserName(UserName))
                 {
                     continue;
@@ -159,8 +157,4 @@ namespace chatCommon
         FalhaAoConectar = 1,
         Sair = 2
     }
-
-
-
-
 }
