@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace ChatServer
+namespace chatServer
 {
     public interface IServer
     {

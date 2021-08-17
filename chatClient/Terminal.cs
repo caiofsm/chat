@@ -6,20 +6,30 @@ namespace chatClient
 {
     public class Terminal : IUserInterface
     {
-        public void ShowWelcomeMessage()
+        public virtual void ShowWelcomeMessage()
         {
-            ShowMessage("*** Welcome to our chat server. Please provide a nickname:");
+            ShowMessage(GetWelcomeMessage());
         }
 
-        public void ShowMessage(string str)
+        public virtual void ShowMessage(string str)
         {
             Console.WriteLine(str);
         }
 
-        public string PrintPromptAndgetInput()
+        public virtual string PrintPromptAndGetInput()
         {
-            Console.Write("> ");
+            Console.Write(GetPrompt());
             return Console.ReadLine();
+        }
+
+        public string GetWelcomeMessage()
+        {
+            return @"***Welcome to our chat server. Please provide a nickname:";
+        }
+
+        public string GetPrompt()
+        {
+            return "> ";
         }
     }
 }
